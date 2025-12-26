@@ -20,7 +20,7 @@ const ALLOWED_DOMAINS = new Set([
   "inshorturl",
   "lksfy",
   "urllinkshort",
-  "ouo"
+  "arolinks"
 ]);
 
 /* =========================
