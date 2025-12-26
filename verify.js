@@ -19,7 +19,7 @@ const ALLOWED_DOMAINS = new Set([
   "vplink",
   "inshorturl",
   "lksfy",
-  "linkvertise",
+  "urllinkshort",
   "ouo"
 ]);
 
