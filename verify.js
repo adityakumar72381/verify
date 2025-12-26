@@ -18,7 +18,7 @@ const statusEl = document.getElementById("status");
 const ALLOWED_DOMAINS = new Set([
   "vplink",
   "inshorturl",
-  "droplink",
+  "lksfy",
   "linkvertise",
   "ouo"
 ]);
