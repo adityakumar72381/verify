@@ -33,23 +33,36 @@ const ALLOWED_DOMAINS = new Set([
     return;
   }
 
-  // Referrer required
+  // Show neutral state first
+  showVerify();
+  statusEl.textContent = "Checking link integrity…";
+
+  // Delay decision (UX purpose)
+  setTimeout(checkReferrerAndProceed, 1000);
+})();
+
+/* =========================
+   REFERRER CHECK
+========================= */
+function checkReferrerAndProceed() {
   const ref = document.referrer;
+
   if (!ref) {
-    showBypass("🚫 Direct access not allowed.");
+    showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  // Extract main domain
   const refDomain = extractMainDomain(ref);
+
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
     showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  // Passed checks → force Turnstile
+  // Passed checks → allow Turnstile
   showVerify();
-})();
+  statusEl.textContent = "Please complete verification…";
+}
 
 /* =========================
    HELPERS
