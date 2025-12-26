@@ -43,7 +43,7 @@ const ALLOWED_DOMAINS = new Set([
   // Extract main domain
   const refDomain = extractMainDomain(ref);
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
-    showBypass("🚫 Invalid referrer.");
+    showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
