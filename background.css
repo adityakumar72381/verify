@@ -1,0 +1,231 @@
+/* =========================
+   BASE
+========================= */
+:root {
+  --bg-dark: #0a0a0f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* =========================
+   WINTER GRID BACKGROUND
+========================= */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.grid-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,61,90,0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,212,170,0.05), transparent 40%),
+    radial-gradient(ellipse at 20% 80%, rgba(255,215,0,0.05), transparent 40%);
+}
+
+/* =========================
+   PARTICLES + SNOW
+========================= */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Floating particles */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float-particle linear infinite;
+}
+
+.particle:nth-child(odd) {
+  background: #ff3d5a;
+}
+
+.particle:nth-child(3n) {
+  background: #00d4aa;
+}
+
+@keyframes float-particle {
+  0% { transform: translateY(100vh); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-20px); opacity: 0; }
+}
+
+/* Snowflakes */
+.snowflake {
+  position: absolute;
+  color: rgba(255,255,255,0.6);
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  animation: snowfall linear infinite;
+}
+
+@keyframes snowfall {
+  from { transform: translateY(-20px); }
+  to { transform: translateY(100vh); }
+}
+
+/* =========================
+   PAGE CONTENT
+========================= */
+.page {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+}
+
+/* =========================
+   CENTER PANEL
+========================= */
+.center-box {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.center-box .content {
+  width: 100%;
+  max-width: 420px;
+  padding: 38px 28px;
+
+  background: linear-gradient(
+    160deg,
+    rgba(10, 25, 40, 0.9),
+    rgba(6, 14, 22, 0.95)
+  );
+
+  border-radius: 18px;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 170, 255, 0.22);
+
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.65),
+    inset 0 0 35px rgba(0, 160, 255, 0.06);
+
+  text-align: center;
+  color: #e8f1ff;
+}
+
+/* =========================
+   OPENING ANIMATION
+========================= */
+.animate-in {
+  animation: panelEnter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes panelEnter {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================
+   SKULL ICON
+========================= */
+.skull-icon {
+  font-size: 3rem;
+  margin-bottom: 18px;
+  color: #ff3d5a;
+  text-shadow: 0 0 14px rgba(255, 61, 90, 0.6);
+}
+
+/* =========================
+   TEXT STYLES
+========================= */
+.alert-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #ff3d5a;
+  margin-bottom: 14px;
+}
+
+.alert-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #d4e1ef;
+  margin-bottom: 24px;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(0, 170, 255, 0.45),
+    transparent
+  );
+  margin-bottom: 18px;
+}
+
+/* Footer */
+.footer-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #9fb6cc;
+}
+
+.footer-text a {
+  color: #4fc3ff;
+  text-decoration: none;
+}
+
+.footer-text a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   DARK BLUE OUTER VIGNETTE
+========================= */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 35%,
+      rgba(5, 20, 40, 0.35) 65%,
+      rgba(3, 10, 25, 0.6) 100%
+    );
+}
