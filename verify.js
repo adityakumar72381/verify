@@ -1,54 +1,47 @@
 let locked = false;
 
 /* =========================
-   PATH & HASH DETECTION
-   site.com/abc → hash = "abc"
+   HASH (site.com/abc)
 ========================= */
-const pathname = location.pathname.replace(/^\/+|\/+$/g, "");
-const hash = pathname || null;
+const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 
 /* =========================
-   UI ELEMENTS
+   UI
 ========================= */
 const bypassBox = document.getElementById("bypass");
 const verifyBox = document.getElementById("verify");
 const statusEl = document.getElementById("status");
 
 /* =========================
-   ENTRY POINT
+   INIT
 ========================= */
 (function init() {
-  // 🔴 Empty path → redirect to main site
+  // Empty path → main site
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // 🔴 No referrer → hard bypass
-  if (!document.referrer) {
-    showBypass();
-    return;
-  }
-
-  // ✅ Referrer exists → force verification
+  // Always show verify page
   showVerify();
 })();
 
 /* =========================
    UI HELPERS
 ========================= */
-function showBypass() {
-  if (bypassBox) bypassBox.style.display = "flex";
-  if (verifyBox) verifyBox.style.display = "none";
+function showBypass(message = "🚫 Access denied.") {
+  bypassBox.style.display = "flex";
+  verifyBox.style.display = "none";
+  if (statusEl) statusEl.textContent = message;
 }
 
 function showVerify() {
-  if (bypassBox) bypassBox.style.display = "none";
-  if (verifyBox) verifyBox.style.display = "flex";
+  bypassBox.style.display = "none";
+  verifyBox.style.display = "flex";
 }
 
 /* =========================
-   TURNSTILE CALLBACK (FORCED)
+   TURNSTILE CALLBACK
 ========================= */
 async function onVerified(token) {
   if (locked) return;
@@ -57,32 +50,29 @@ async function onVerified(token) {
   statusEl.textContent = "Verifying request…";
 
   try {
-    const res = await fetch("https://cdn.nxlinks.site/resolve", {
+    const res = await fetch("https://backend.nxlinks.site/api", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        path: hash,
+        path: "/" + hash,
         turnstile_token: token
       })
     });
 
     const data = await res.json();
 
-    if (data && data.status === "success" && data.destination) {
-      statusEl.textContent = "Redirecting securely…";
-      location.replace(data.destination);
+    if (data.success && data.url) {
+      location.replace(data.url);
       return;
     }
 
-    // ❌ Backend denied
-    showBypass();
+    // Backend rejected → bypass
+    showBypass("🚫 " + (data.reason || "Access denied"));
 
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "Verification failed. Please refresh.";
+  } catch (e) {
+    console.error(e);
     locked = false;
+    statusEl.textContent = "❌ Verification failed. Try again.";
   }
 }
 
