@@ -5,7 +5,7 @@
   <title>NXLinks – Secure Access</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Turnstile -->
+  <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Fonts -->
@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- Styles -->
   <link rel="stylesheet" href="background.css">
 </head>
 <body>
@@ -26,15 +27,23 @@
     <div id="bypass" class="center-box" style="display:none">
       <div class="content animate-in">
         <div class="skull-icon">☠</div>
+
         <h1 class="alert-title">BYPASS DETECTED !</h1>
+
         <p class="alert-text">
           Don’t be oversmart and attempt to bypass links for paid content.<br>
           Repeated violations may permanently block your access.
         </p>
-        <div class="divider"></div>
+
+        <!-- Divider -->
+        <div class="divider" style="margin:22px 0"></div>
+
+        <!-- Footer -->
         <p class="footer-text">
           Created by
-          <a href="https://t.me/Obsidian_Bots" target="_blank">Obsidian Bots</a>
+          <a href="https://t.me/Obsidian_Bots" target="_blank">
+            Obsidian Bots
+          </a>
         </p>
       </div>
     </div>
@@ -43,25 +52,44 @@
     <div id="verify" class="center-box" style="display:none">
       <div class="content animate-in">
         <h1 class="alert-title">VERIFY ACCESS</h1>
-        <p class="alert-text">Please complete verification to continue</p>
 
+        <p class="alert-text">
+          Please complete verification to continue
+        </p>
+
+        <!-- Turnstile widget -->
         <div
           id="turnstile-box"
           class="cf-turnstile"
           data-sitekey="0x4AAAAAACJMB1_RfxHtOMMU"
           data-callback="onVerified"
           data-theme="dark"
+          style="margin-top:20px"
         ></div>
 
-        <p id="status" class="footer-text">
+        <!-- Increased spacing -->
+        <p id="status" class="footer-text" style="margin-top:28px">
           Waiting for verification…
+        </p>
+
+        <!-- Divider -->
+        <div class="divider" style="margin:22px 0"></div>
+
+        <!-- Footer -->
+        <p class="footer-text">
+          Created by
+          <a href="https://t.me/Obsidian_Bots" target="_blank">
+            Obsidian Bots
+          </a>
         </p>
       </div>
     </div>
 
   </main>
 
+  <!-- Scripts -->
   <script src="background.js"></script>
   <script src="verify.js"></script>
+
 </body>
 </html>
