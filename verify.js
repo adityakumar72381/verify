@@ -6,30 +6,65 @@ let locked = false;
 const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 
 /* =========================
-   UI
+   UI ELEMENTS
 ========================= */
 const bypassBox = document.getElementById("bypass");
 const verifyBox = document.getElementById("verify");
 const statusEl = document.getElementById("status");
 
 /* =========================
+   ALLOWED REFERRER DOMAINS
+========================= */
+const ALLOWED_DOMAINS = new Set([
+  "vplink",
+  "inshorturl",
+  "droplink",
+  "linkvertise",
+  "ouo"
+]);
+
+/* =========================
    INIT
 ========================= */
 (function init() {
-  // Empty path → main site
+  // Empty path → redirect to main site
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // Always show verify page
+  // Referrer required
+  const ref = document.referrer;
+  if (!ref) {
+    showBypass("🚫 Direct access not allowed.");
+    return;
+  }
+
+  // Extract main domain
+  const refDomain = extractMainDomain(ref);
+  if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
+    showBypass("🚫 Invalid referrer.");
+    return;
+  }
+
+  // Passed checks → force Turnstile
   showVerify();
 })();
 
 /* =========================
-   UI HELPERS
+   HELPERS
 ========================= */
-function showBypass(message = "🚫 Access denied.") {
+function extractMainDomain(ref) {
+  try {
+    const host = new URL(ref).hostname;
+    const parts = host.split(".");
+    return parts.length > 1 ? parts[parts.length - 2] : null;
+  } catch {
+    return null;
+  }
+}
+
+function showBypass(message) {
   bypassBox.style.display = "flex";
   verifyBox.style.display = "none";
   if (statusEl) statusEl.textContent = message;
@@ -66,7 +101,6 @@ async function onVerified(token) {
       return;
     }
 
-    // Backend rejected → bypass
     showBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
