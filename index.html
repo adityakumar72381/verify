@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NXLinks – Secure Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="background.css">
+</head>
+<body>
+
+  <div class="grid-bg"></div>
+  <div id="particles" class="particles"></div>
+
+  <main class="page">
+
+    <!-- ================= BYPASS PAGE ================= -->
+    <div id="bypass" class="center-box" style="display:none">
+      <div class="content animate-in">
+        <div class="skull-icon">☠</div>
+        <h1 class="alert-title">BYPASS DETECTED !</h1>
+        <p class="alert-text">
+          Don’t be oversmart and attempt to bypass links for paid content.<br>
+          Repeated violations may permanently block your access.
+        </p>
+        <div class="divider"></div>
+        <p class="footer-text">
+          Created by
+          <a href="https://t.me/Obsidian_Bots" target="_blank">Obsidian Bots</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= VERIFY PAGE ================= -->
+    <div id="verify" class="center-box" style="display:none">
+      <div class="content animate-in">
+        <h1 class="alert-title">Verify Access</h1>
+        <p class="alert-text">Please complete verification to continue</p>
+
+        <div
+          id="turnstile-box"
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAACGxt81mvbEZp9hB"
+          data-callback="onVerified"
+          data-theme="dark"
+        ></div>
+
+        <p id="status" class="footer-text">
+          Waiting for verification…
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="background.js"></script>
+  <script src="verify.js"></script>
+</body>
+</html>
