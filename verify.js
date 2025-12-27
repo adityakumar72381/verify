@@ -2,18 +2,17 @@ let locked = false;
 let decisionLocked = false;
 
 /* =========================
-   HASH (site.com/abc)
+HASH (site.com/abc)
 ========================= */
 const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 
 /* =========================
-   SESSION + REFERRER CACHE
+CACHE REFERRER (ONCE)
 ========================= */
-const SESSION_KEY = "nx_decision:" + hash;
 const INITIAL_REFERRER = document.referrer;
 
 /* =========================
-   UI ELEMENTS
+UI ELEMENTS
 ========================= */
 const loadingBox = document.getElementById("loading");
 const bypassBox  = document.getElementById("bypass");
@@ -21,7 +20,7 @@ const verifyBox  = document.getElementById("verify");
 const statusEl   = document.getElementById("status");
 
 /* =========================
-   ALLOWED REFERRER DOMAINS
+ALLOWED REFERRER DOMAINS
 ========================= */
 const ALLOWED_DOMAINS = new Set([
   "vplink",
@@ -32,68 +31,48 @@ const ALLOWED_DOMAINS = new Set([
 ]);
 
 /* =========================
-   LOADER CONTROLS
-========================= */
-function showLoading() {
-  loadingBox.style.display = "flex";
-  bypassBox.style.display = "none";
-  verifyBox.style.display = "none";
-}
-
-function hideLoading() {
-  loadingBox.style.display = "none";
-}
-
-/* =========================
-   INIT
+INIT
 ========================= */
 (function init() {
+  // Empty path → redirect
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
+  // STEP 1: detect referrer immediately
+  const isAllowed = isValidReferrer(INITIAL_REFERRER);
+
+  // STEP 2: show loader AFTER detection
   showLoading();
   statusEl.textContent = "Checking link integrity…";
 
-  const savedDecision = sessionStorage.getItem(SESSION_KEY);
-  if (savedDecision === "bypass") {
+  // STEP 3: lock & show result
+  setTimeout(() => {
+    if (decisionLocked) return;
     decisionLocked = true;
-    hideLoading();
-    bypassBox.style.display = "flex";
-    statusEl.textContent = "🚫 BYPASS DETECTED.";
-    return;
-  }
 
-  setTimeout(checkReferrerAndProceed, 1000);
+    if (!isAllowed) {
+      showBypass("🚫 BYPASS DETECTED.");
+    } else {
+      showVerify();
+      statusEl.textContent = "Please complete verification…";
+    }
+  }, 1000);
 })();
 
 /* =========================
-   REFERRER CHECK
+REFERRER VALIDATION
 ========================= */
-function checkReferrerAndProceed() {
-  if (decisionLocked) return;
+function isValidReferrer(ref) {
+  if (!ref) return false;
 
-  const ref = INITIAL_REFERRER;
-  if (!ref) {
-    showBypass("🚫 BYPASS DETECTED.");
-    return;
-  }
-
-  const refDomain = extractMainDomain(ref);
-  if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
-    showBypass("🚫 BYPASS DETECTED.");
-    return;
-  }
-
-  decisionLocked = true;
-  hideLoading();
-  verifyBox.style.display = "flex";
-  statusEl.textContent = "Please complete verification…";
+  const domain = extractMainDomain(ref);
+  return domain && ALLOWED_DOMAINS.has(domain);
 }
 
 /* =========================
-   HELPERS
+HELPERS
 ========================= */
 function extractMainDomain(ref) {
   try {
@@ -105,20 +84,30 @@ function extractMainDomain(ref) {
   }
 }
 
+/* =========================
+UI HELPERS
+========================= */
+function showLoading() {
+  loadingBox.style.display = "flex";
+  bypassBox.style.display  = "none";
+  verifyBox.style.display  = "none";
+}
+
 function showBypass(message) {
-  if (decisionLocked) return;
-  decisionLocked = true;
-
-  sessionStorage.setItem(SESSION_KEY, "bypass");
-
-  hideLoading();
-  bypassBox.style.display = "flex";
-  verifyBox.style.display = "none";
+  loadingBox.style.display = "none";
+  bypassBox.style.display  = "flex";
+  verifyBox.style.display  = "none";
   statusEl.textContent = message;
 }
 
+function showVerify() {
+  loadingBox.style.display = "none";
+  bypassBox.style.display  = "none";
+  verifyBox.style.display  = "flex";
+}
+
 /* =========================
-   TURNSTILE CALLBACK
+TURNSTILE CALLBACK
 ========================= */
 async function onVerified(token) {
   if (locked) return;
@@ -139,12 +128,10 @@ async function onVerified(token) {
     const data = await res.json();
 
     if (data.success && data.url) {
-      sessionStorage.setItem(SESSION_KEY, "verify"); // ✅ SAVE ONLY ON SUCCESS
       location.replace(data.url);
       return;
     }
 
-    sessionStorage.setItem(SESSION_KEY, "bypass");
     showBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
