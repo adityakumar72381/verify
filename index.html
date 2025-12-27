@@ -16,17 +16,13 @@
   <!-- Styles -->
   <link rel="stylesheet" href="background.css">
 
-  <!-- 404 layout fix (safe for all pages) -->
+  <!-- Layout safety -->
   <style>
     .page {
       min-height: 100svh;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    footer {
-      padding-bottom: 16px;
     }
   </style>
 </head>
@@ -38,7 +34,7 @@
   <main class="page">
 
     <!-- ================= BYPASS PAGE ================= -->
-    <div id="bypass" class="center-box" style="display:none; z-index:5">
+    <div id="bypass" class="center-box" style="display:none">
       <div class="content animate-in">
         <div class="skull-icon">☠</div>
 
@@ -61,7 +57,7 @@
     </div>
 
     <!-- ================= VERIFY PAGE ================= -->
-    <div id="verify" class="center-box" style="display:none; z-index:5">
+    <div id="verify" class="center-box" style="display:none">
       <div class="content animate-in">
         <h1 class="alert-title">VERIFY ACCESS</h1>
 
@@ -94,34 +90,31 @@
     </div>
 
     <!-- ================= 404 PAGE ================= -->
-    <div id="notfound" class="center-box" style="display:none; z-index:5">
-      <div class="card" style="width:100%;max-width:360px;text-align:center">
+    <div id="notfound" class="center-box" style="display:none">
+      <div class="content animate-in">
 
-        <div style="font-size:96px;line-height:1;margin-bottom:16px">
-          ⚠️
-        </div>
+        <div style="font-size:72px; margin-bottom:16px">⚠️</div>
 
-        <h2 style="color:#ff4d4d; margin-bottom:10px;">
+        <h1 class="alert-title" style="color:#ff4d4d">
           Page Not Available
-        </h2>
+        </h1>
 
-        <p class="subtitle">
+        <p class="alert-text">
           The page you are trying to access does not exist,
           has expired, or is unavailable.
         </p>
 
-        <div class="status" style="color:#ff4d4d">
+        <p class="status" style="color:#ff4d4d; margin-top:18px">
           Redirecting to home in <span id="countdown">5</span> seconds…
-        </div>
+        </p>
 
-        <footer style="margin-top:22px">
-          <div class="line"></div>
-          <p>
-            © <span id="year"></span> NXLinks.site<br>
-            Powered by Cloudflare services<br>
-            <strong>Obsidian Bots</strong>
-          </p>
-        </footer>
+        <div class="divider" style="margin:22px 0"></div>
+
+        <p class="footer-text">
+          © <span id="year"></span> NXLinks.site<br>
+          Powered by Cloudflare services<br>
+          <strong>Obsidian Bots</strong>
+        </p>
 
       </div>
     </div>
