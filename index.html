@@ -15,6 +15,20 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="background.css">
+
+  <!-- 404 layout fix (safe for all pages) -->
+  <style>
+    .page {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    footer {
+      padding-bottom: 16px;
+    }
+  </style>
 </head>
 <body>
 
@@ -24,7 +38,7 @@
   <main class="page">
 
     <!-- ================= BYPASS PAGE ================= -->
-    <div id="bypass" class="center-box" style="display:none">
+    <div id="bypass" class="center-box" style="display:none; z-index:5">
       <div class="content animate-in">
         <div class="skull-icon">☠</div>
 
@@ -35,10 +49,8 @@
           Repeated violations may permanently block your access.
         </p>
 
-        <!-- Divider -->
         <div class="divider" style="margin:22px 0"></div>
 
-        <!-- Footer -->
         <p class="footer-text">
           Created by
           <a href="https://t.me/Obsidian_Bots" target="_blank">
@@ -49,7 +61,7 @@
     </div>
 
     <!-- ================= VERIFY PAGE ================= -->
-    <div id="verify" class="center-box" style="display:none">
+    <div id="verify" class="center-box" style="display:none; z-index:5">
       <div class="content animate-in">
         <h1 class="alert-title">VERIFY ACCESS</h1>
 
@@ -57,7 +69,6 @@
           Please complete verification to continue
         </p>
 
-        <!-- Turnstile widget -->
         <div
           id="turnstile-box"
           class="cf-turnstile"
@@ -67,21 +78,51 @@
           style="margin-top:20px"
         ></div>
 
-        <!-- Increased spacing -->
         <p id="status" class="footer-text" style="margin-top:28px">
           Waiting for verification…
         </p>
 
-        <!-- Divider -->
         <div class="divider" style="margin:22px 0"></div>
 
-        <!-- Footer -->
         <p class="footer-text">
           Created by
           <a href="https://t.me/Obsidian_Bots" target="_blank">
             Obsidian Bots
           </a>
         </p>
+      </div>
+    </div>
+
+    <!-- ================= 404 PAGE ================= -->
+    <div id="notfound" class="center-box" style="display:none; z-index:5">
+      <div class="card" style="width:100%;max-width:360px;text-align:center">
+
+        <div style="font-size:96px;line-height:1;margin-bottom:16px">
+          ⚠️
+        </div>
+
+        <h2 style="color:#ff4d4d; margin-bottom:10px;">
+          Page Not Available
+        </h2>
+
+        <p class="subtitle">
+          The page you are trying to access does not exist,
+          has expired, or is unavailable.
+        </p>
+
+        <div class="status" style="color:#ff4d4d">
+          Redirecting to home in <span id="countdown">5</span> seconds…
+        </div>
+
+        <footer style="margin-top:22px">
+          <div class="line"></div>
+          <p>
+            © <span id="year"></span> NXLinks.site<br>
+            Powered by Cloudflare services<br>
+            <strong>Obsidian Bots</strong>
+          </p>
+        </footer>
+
       </div>
     </div>
 
