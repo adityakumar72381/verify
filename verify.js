@@ -1,4 +1,5 @@
 let locked = false;
+let decisionLocked = false;
 
 /* =========================
    HASH (site.com/abc)
@@ -6,11 +7,18 @@ let locked = false;
 const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 
 /* =========================
+   SESSION + REFERRER CACHE
+========================= */
+const SESSION_KEY = "nx_decision:" + hash;
+const INITIAL_REFERRER = document.referrer;
+
+/* =========================
    UI ELEMENTS
 ========================= */
-const bypassBox = document.getElementById("bypass");
-const verifyBox = document.getElementById("verify");
-const statusEl = document.getElementById("status");
+const loadingBox = document.getElementById("loading");
+const bypassBox  = document.getElementById("bypass");
+const verifyBox  = document.getElementById("verify");
+const statusEl   = document.getElementById("status");
 
 /* =========================
    ALLOWED REFERRER DOMAINS
@@ -24,20 +32,52 @@ const ALLOWED_DOMAINS = new Set([
 ]);
 
 /* =========================
+   LOADER CONTROLS
+========================= */
+function showLoading() {
+  if (loadingBox) loadingBox.style.display = "flex";
+  if (bypassBox) bypassBox.style.display = "none";
+  if (verifyBox) verifyBox.style.display = "none";
+}
+
+function hideLoading() {
+  if (loadingBox) loadingBox.style.display = "none";
+}
+
+/* =========================
    INIT
 ========================= */
 (function init() {
-  // Empty path → redirect to main site
+  // Empty path → redirect
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // Show neutral state first
-  showVerify();
-  statusEl.textContent = "Checking link integrity…";
+  // SHOW LOADER FIRST
+  showLoading();
+  if (statusEl) statusEl.textContent = "Checking link integrity…";
 
-  // Delay decision (UX purpose)
+  // Restore decision (same link, same tab)
+  const savedDecision = sessionStorage.getItem(SESSION_KEY);
+
+  if (savedDecision === "verify") {
+    decisionLocked = true;
+    hideLoading();
+    verifyBox.style.display = "flex";
+    if (statusEl) statusEl.textContent = "Please complete verification…";
+    return;
+  }
+
+  if (savedDecision === "bypass") {
+    decisionLocked = true;
+    hideLoading();
+    bypassBox.style.display = "flex";
+    if (statusEl) statusEl.textContent = "🚫 BYPASS DETECTED.";
+    return;
+  }
+
+  // Delay decision (UX + stability)
   setTimeout(checkReferrerAndProceed, 1000);
 })();
 
@@ -45,7 +85,9 @@ const ALLOWED_DOMAINS = new Set([
    REFERRER CHECK
 ========================= */
 function checkReferrerAndProceed() {
-  const ref = document.referrer;
+  if (decisionLocked) return;
+
+  const ref = INITIAL_REFERRER;
 
   if (!ref) {
     showBypass("🚫 BYPASS DETECTED.");
@@ -59,9 +101,7 @@ function checkReferrerAndProceed() {
     return;
   }
 
-  // Passed checks → allow Turnstile
   showVerify();
-  statusEl.textContent = "Please complete verification…";
 }
 
 /* =========================
@@ -78,14 +118,27 @@ function extractMainDomain(ref) {
 }
 
 function showBypass(message) {
+  if (decisionLocked) return;
+  decisionLocked = true;
+
+  sessionStorage.setItem(SESSION_KEY, "bypass");
+
+  hideLoading();
   bypassBox.style.display = "flex";
   verifyBox.style.display = "none";
   if (statusEl) statusEl.textContent = message;
 }
 
 function showVerify() {
+  if (decisionLocked) return;
+  decisionLocked = true;
+
+  sessionStorage.setItem(SESSION_KEY, "verify");
+
+  hideLoading();
   bypassBox.style.display = "none";
   verifyBox.style.display = "flex";
+  if (statusEl) statusEl.textContent = "Please complete verification…";
 }
 
 /* =========================
@@ -95,7 +148,7 @@ async function onVerified(token) {
   if (locked) return;
   locked = true;
 
-  statusEl.textContent = "Verifying request…";
+  if (statusEl) statusEl.textContent = "Verifying request…";
 
   try {
     const res = await fetch("https://backend.nxlinks.site/api", {
@@ -119,7 +172,7 @@ async function onVerified(token) {
   } catch (e) {
     console.error(e);
     locked = false;
-    statusEl.textContent = "❌ Verification failed. Try again.";
+    if (statusEl) statusEl.textContent = "❌ Verification failed. Try again.";
   }
 }
 
