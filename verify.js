@@ -10,7 +10,41 @@ const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 ========================= */
 const bypassBox = document.getElementById("bypass");
 const verifyBox = document.getElementById("verify");
+const notFoundBox = document.getElementById("notfound");
 const statusEl = document.getElementById("status");
+
+/* =========================
+   HANDLE /404 ROUTE (EARLY EXIT)
+========================= */
+if (hash === "404") {
+  // Hide other states
+  if (bypassBox) bypassBox.style.display = "none";
+  if (verifyBox) verifyBox.style.display = "none";
+
+  // Show 404 state
+  if (notFoundBox) notFoundBox.style.display = "flex";
+
+  // Footer year
+  const yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // Countdown redirect
+  let sec = 5;
+  const el = document.getElementById("countdown");
+  if (el) {
+    const timer = setInterval(() => {
+      sec--;
+      el.textContent = sec;
+      if (sec <= 0) {
+        clearInterval(timer);
+        location.replace("/");
+      }
+    }, 1000);
+  }
+
+  // Stop further execution
+  throw new Error("404 page rendered");
+}
 
 /* =========================
    ALLOWED REFERRER DOMAINS
@@ -35,7 +69,7 @@ const ALLOWED_DOMAINS = new Set([
 
   // Show neutral state first
   showVerify();
-  statusEl.textContent = "Checking link integrity…";
+  if (statusEl) statusEl.textContent = "Checking link integrity…";
 
   // Delay decision (UX purpose)
   setTimeout(checkReferrerAndProceed, 1000);
@@ -61,7 +95,7 @@ function checkReferrerAndProceed() {
 
   // Passed checks → allow Turnstile
   showVerify();
-  statusEl.textContent = "Please complete verification…";
+  if (statusEl) statusEl.textContent = "Please complete verification…";
 }
 
 /* =========================
@@ -78,14 +112,16 @@ function extractMainDomain(ref) {
 }
 
 function showBypass(message) {
-  bypassBox.style.display = "flex";
-  verifyBox.style.display = "none";
+  if (bypassBox) bypassBox.style.display = "flex";
+  if (verifyBox) verifyBox.style.display = "none";
+  if (notFoundBox) notFoundBox.style.display = "none";
   if (statusEl) statusEl.textContent = message;
 }
 
 function showVerify() {
-  bypassBox.style.display = "none";
-  verifyBox.style.display = "flex";
+  if (bypassBox) bypassBox.style.display = "none";
+  if (verifyBox) verifyBox.style.display = "flex";
+  if (notFoundBox) notFoundBox.style.display = "none";
 }
 
 /* =========================
@@ -95,7 +131,7 @@ async function onVerified(token) {
   if (locked) return;
   locked = true;
 
-  statusEl.textContent = "Verifying request…";
+  if (statusEl) statusEl.textContent = "Verifying request…";
 
   try {
     const res = await fetch("https://backend.nxlinks.site/api", {
@@ -127,7 +163,7 @@ async function onVerified(token) {
   } catch (e) {
     console.error(e);
     locked = false;
-    statusEl.textContent = "❌ Verification failed. Try again.";
+    if (statusEl) statusEl.textContent = "❌ Verification failed. Try again.";
   }
 }
 
