@@ -35,49 +35,36 @@ const ALLOWED_DOMAINS = new Set([
    LOADER CONTROLS
 ========================= */
 function showLoading() {
-  if (loadingBox) loadingBox.style.display = "flex";
-  if (bypassBox) bypassBox.style.display = "none";
-  if (verifyBox) verifyBox.style.display = "none";
+  loadingBox.style.display = "flex";
+  bypassBox.style.display = "none";
+  verifyBox.style.display = "none";
 }
 
 function hideLoading() {
-  if (loadingBox) loadingBox.style.display = "none";
+  loadingBox.style.display = "none";
 }
 
 /* =========================
    INIT
 ========================= */
 (function init() {
-  // Empty path → redirect
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // SHOW LOADER FIRST
   showLoading();
-  if (statusEl) statusEl.textContent = "Checking link integrity…";
+  statusEl.textContent = "Checking link integrity…";
 
-  // Restore decision (same link, same tab)
   const savedDecision = sessionStorage.getItem(SESSION_KEY);
-
-  if (savedDecision === "verify") {
-    decisionLocked = true;
-    hideLoading();
-    verifyBox.style.display = "flex";
-    if (statusEl) statusEl.textContent = "Please complete verification…";
-    return;
-  }
-
   if (savedDecision === "bypass") {
     decisionLocked = true;
     hideLoading();
     bypassBox.style.display = "flex";
-    if (statusEl) statusEl.textContent = "🚫 BYPASS DETECTED.";
+    statusEl.textContent = "🚫 BYPASS DETECTED.";
     return;
   }
 
-  // Delay decision (UX + stability)
   setTimeout(checkReferrerAndProceed, 1000);
 })();
 
@@ -88,20 +75,21 @@ function checkReferrerAndProceed() {
   if (decisionLocked) return;
 
   const ref = INITIAL_REFERRER;
-
   if (!ref) {
     showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
   const refDomain = extractMainDomain(ref);
-
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
     showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  showVerify();
+  decisionLocked = true;
+  hideLoading();
+  verifyBox.style.display = "flex";
+  statusEl.textContent = "Please complete verification…";
 }
 
 /* =========================
@@ -126,19 +114,7 @@ function showBypass(message) {
   hideLoading();
   bypassBox.style.display = "flex";
   verifyBox.style.display = "none";
-  if (statusEl) statusEl.textContent = message;
-}
-
-function showVerify() {
-  if (decisionLocked) return;
-  decisionLocked = true;
-
-  sessionStorage.setItem(SESSION_KEY, "verify");
-
-  hideLoading();
-  bypassBox.style.display = "none";
-  verifyBox.style.display = "flex";
-  if (statusEl) statusEl.textContent = "Please complete verification…";
+  statusEl.textContent = message;
 }
 
 /* =========================
@@ -148,7 +124,7 @@ async function onVerified(token) {
   if (locked) return;
   locked = true;
 
-  if (statusEl) statusEl.textContent = "Verifying request…";
+  statusEl.textContent = "Verifying request…";
 
   try {
     const res = await fetch("https://backend.nxlinks.site/api", {
@@ -163,16 +139,18 @@ async function onVerified(token) {
     const data = await res.json();
 
     if (data.success && data.url) {
+      sessionStorage.setItem(SESSION_KEY, "verify"); // ✅ SAVE ONLY ON SUCCESS
       location.replace(data.url);
       return;
     }
 
+    sessionStorage.setItem(SESSION_KEY, "bypass");
     showBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
     console.error(e);
     locked = false;
-    if (statusEl) statusEl.textContent = "❌ Verification failed. Try again.";
+    statusEl.textContent = "❌ Verification failed. Try again.";
   }
 }
 
