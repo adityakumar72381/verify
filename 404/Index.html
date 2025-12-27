@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Not Available</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Same site UI -->
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100svh; /* ✅ fixes mobile browser bar issue */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    footer {
+      padding-bottom: 16px; /* ✅ breathing space after footer */
+    }
+  </style>
+</head>
+<body>
+
+<!-- CENTER AREA -->
+<div class="page">
+  <div class="card" style="
+    width:100%;
+    max-width:360px;
+    text-align:center;
+  ">
+
+    <!-- BIG WARNING ICON -->
+    <div style="
+      font-size:96px;
+      line-height:1;
+      margin-bottom:16px;
+    ">
+      ⚠️
+    </div>
+
+    <h2 style="color:#ff4d4d; margin-bottom:10px;">
+      Page Not Available
+    </h2>
+
+    <p class="subtitle">
+      The page you are trying to access does not exist,
+      has expired, or is unavailable.
+    </p>
+
+    <div class="status" style="color:#ff4d4d">
+      Redirecting to home in <span id="countdown">5</span> seconds…
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER (VISIBLE, CLEAN, NOT STICKY) -->
+<footer>
+  <div class="line"></div>
+  <p>
+    © <span id="year"></span> NXLinks.site<br>
+    Powered by Cloudflare services<br>
+    <strong>Obsidian Bots</strong>
+  </p>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  let sec = 5;
+  const el = document.getElementById("countdown");
+
+  setInterval(() => {
+    sec--;
+    el.textContent = sec;
+    if (sec <= 0) {
+      window.location.replace("/");
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
