@@ -9,6 +9,7 @@ const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 /* =========================
    UI ELEMENTS
 ========================= */
+const loadingBox = document.getElementById("loading");
 const bypassBox = document.getElementById("bypass");
 const verifyBox = document.getElementById("verify");
 const notFoundBox = document.getElementById("notfound");
@@ -18,12 +19,10 @@ const statusEl = document.getElementById("status");
    HANDLE /404 ROUTE (EARLY EXIT)
 ========================= */
 if (hash === "404") {
+  if (loadingBox) loadingBox.style.display = "none";
   if (bypassBox) bypassBox.style.display = "none";
   if (verifyBox) verifyBox.style.display = "none";
   if (notFoundBox) notFoundBox.style.display = "flex";
-
-  const yearEl = document.getElementById("year");
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   let sec = 5;
   const el = document.getElementById("countdown");
@@ -53,7 +52,7 @@ const ALLOWED_DOMAINS = new Set([
 ]);
 
 /* =========================
-   INIT
+   INIT (LOADER ONLY)
 ========================= */
 (function init() {
   if (!hash) {
@@ -61,16 +60,14 @@ const ALLOWED_DOMAINS = new Set([
     return;
   }
 
-  // Neutral loader state
-  showVerify();
-  if (statusEl) statusEl.textContent = "Checking link integrity…";
+  showLoading("Checking link integrity…");
 
-  // Delay for browser referrer settling
+  // Allow browser to settle referrer
   setTimeout(checkReferrerAndProceed, 800);
 })();
 
 /* =========================
-   REFERRER CHECK (DECISION POINT)
+   REFERRER CHECK
 ========================= */
 function checkReferrerAndProceed() {
   if (bypassLocked) return;
@@ -83,13 +80,12 @@ function checkReferrerAndProceed() {
   }
 
   const refDomain = extractMainDomain(ref);
-
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
     lockBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  // ✅ PASSED → allow Turnstile
+  // ✅ PASSED
   showVerify();
   if (statusEl) statusEl.textContent = "Please complete verification…";
 }
@@ -99,12 +95,38 @@ function checkReferrerAndProceed() {
 ========================= */
 function lockBypass(message) {
   bypassLocked = true;
-  locked = true; // ⛔ prevents API calls forever
+  locked = true; // ⛔ prevents Turnstile + API
   showBypass(message);
 }
 
 /* =========================
-   HELPERS
+   UI HELPERS
+========================= */
+function showLoading(message) {
+  if (loadingBox) loadingBox.style.display = "flex";
+  if (verifyBox) verifyBox.style.display = "none";
+  if (bypassBox) bypassBox.style.display = "none";
+  if (notFoundBox) notFoundBox.style.display = "none";
+  if (statusEl && message) statusEl.textContent = message;
+}
+
+function showVerify() {
+  if (loadingBox) loadingBox.style.display = "none";
+  if (verifyBox) verifyBox.style.display = "flex";
+  if (bypassBox) bypassBox.style.display = "none";
+  if (notFoundBox) notFoundBox.style.display = "none";
+}
+
+function showBypass(message) {
+  if (loadingBox) loadingBox.style.display = "none";
+  if (verifyBox) verifyBox.style.display = "none";
+  if (bypassBox) bypassBox.style.display = "flex";
+  if (notFoundBox) notFoundBox.style.display = "none";
+  if (statusEl && message) statusEl.textContent = message;
+}
+
+/* =========================
+   DOMAIN HELPER
 ========================= */
 function extractMainDomain(ref) {
   try {
@@ -114,19 +136,6 @@ function extractMainDomain(ref) {
   } catch {
     return null;
   }
-}
-
-function showBypass(message) {
-  if (bypassBox) bypassBox.style.display = "flex";
-  if (verifyBox) verifyBox.style.display = "none";
-  if (notFoundBox) notFoundBox.style.display = "none";
-  if (statusEl) statusEl.textContent = message;
-}
-
-function showVerify() {
-  if (bypassBox) bypassBox.style.display = "none";
-  if (verifyBox) verifyBox.style.display = "flex";
-  if (notFoundBox) notFoundBox.style.display = "none";
 }
 
 /* =========================
