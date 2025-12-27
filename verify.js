@@ -1,4 +1,5 @@
 let locked = false;
+let bypassLocked = false; // 🔒 hard lock when bypass detected
 
 /* =========================
    HASH (site.com/abc)
@@ -17,18 +18,13 @@ const statusEl = document.getElementById("status");
    HANDLE /404 ROUTE (EARLY EXIT)
 ========================= */
 if (hash === "404") {
-  // Hide other states
   if (bypassBox) bypassBox.style.display = "none";
   if (verifyBox) verifyBox.style.display = "none";
-
-  // Show 404 state
   if (notFoundBox) notFoundBox.style.display = "flex";
 
-  // Footer year
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Countdown redirect
   let sec = 5;
   const el = document.getElementById("countdown");
   if (el) {
@@ -42,7 +38,6 @@ if (hash === "404") {
     }, 1000);
   }
 
-  // Stop further execution
   throw new Error("404 page rendered");
 }
 
@@ -61,41 +56,51 @@ const ALLOWED_DOMAINS = new Set([
    INIT
 ========================= */
 (function init() {
-  // Empty path → redirect to main site
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // Show neutral state first
+  // Neutral loader state
   showVerify();
   if (statusEl) statusEl.textContent = "Checking link integrity…";
 
-  // Delay decision (UX purpose)
-  setTimeout(checkReferrerAndProceed, 1000);
+  // Delay for browser referrer settling
+  setTimeout(checkReferrerAndProceed, 800);
 })();
 
 /* =========================
-   REFERRER CHECK
+   REFERRER CHECK (DECISION POINT)
 ========================= */
 function checkReferrerAndProceed() {
+  if (bypassLocked) return;
+
   const ref = document.referrer;
 
   if (!ref) {
-    showBypass("🚫 BYPASS DETECTED.");
+    lockBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
   const refDomain = extractMainDomain(ref);
 
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
-    showBypass("🚫 BYPASS DETECTED.");
+    lockBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  // Passed checks → allow Turnstile
+  // ✅ PASSED → allow Turnstile
   showVerify();
   if (statusEl) statusEl.textContent = "Please complete verification…";
+}
+
+/* =========================
+   HARD BYPASS LOCK
+========================= */
+function lockBypass(message) {
+  bypassLocked = true;
+  locked = true; // ⛔ prevents API calls forever
+  showBypass(message);
 }
 
 /* =========================
@@ -128,9 +133,10 @@ function showVerify() {
    TURNSTILE CALLBACK
 ========================= */
 async function onVerified(token) {
-  if (locked) return;
-  locked = true;
+  // ⛔ HARD BLOCK
+  if (locked || bypassLocked) return;
 
+  locked = true;
   if (statusEl) statusEl.textContent = "Verifying request…";
 
   try {
@@ -145,20 +151,17 @@ async function onVerified(token) {
 
     const data = await res.json();
 
-    // ✅ SUCCESS
     if (data.success && data.url) {
       location.replace(data.url);
       return;
     }
 
-    // ✅ NOT FOUND → site.com/404
     if (data.reason === "not_found") {
       location.replace("/404");
       return;
     }
 
-    // ❌ OTHER ERRORS
-    showBypass("🚫 " + (data.reason || "Access denied"));
+    lockBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
     console.error(e);
