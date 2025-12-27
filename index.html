@@ -5,18 +5,24 @@
   <title>NXLinks – Secure Access</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Cloudflare Turnstile -->
+  <!-- Cloudflare Turnstile (kept in head as requested) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  >
 
   <!-- Styles -->
   <link rel="stylesheet" href="background.css">
 
   <style>
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
     .page {
       min-height: 100svh;
       display: flex;
@@ -25,6 +31,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="grid-bg"></div>
@@ -32,25 +39,78 @@
 
   <main class="page">
 
+    <!-- ================= LOADING PAGE (DEFAULT) ================= -->
+    <div id="loading" class="center-box">
+      <div class="content animate-in" style="text-align:center">
+
+        <div style="width:64px; margin:0 auto 18px; color:#4d9fff">
+          <!-- LOADER SVG -->
+          <svg viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg">
+            <g fill="none" fill-rule="evenodd">
+              <g transform="translate(2 1)" stroke="currentColor" stroke-width="1.5">
+                <circle cx="42.601" cy="11.462" r="5" fill="currentColor">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="1;0;0;0;0;0;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="49.063" cy="27.063" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;1;0;0;0;0;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="42.601" cy="42.663" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;1;0;0;0;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="27" cy="49.125" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;0;1;0;0;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="11.399" cy="42.663" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;0;0;1;0;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="4.938" cy="27.063" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;0;0;0;1;0;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="11.399" cy="11.462" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;0;0;0;0;1;0" repeatCount="indefinite" />
+                </circle>
+                <circle cx="27" cy="5" r="5">
+                  <animate attributeName="fill-opacity" begin="0s" dur="1.3s"
+                    values="0;0;0;0;0;0;0;1" repeatCount="indefinite" />
+                </circle>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <h1 class="alert-title">Checking Link Integrity</h1>
+        <p class="alert-text">Please wait while we validate your access…</p>
+        <p id="status" class="footer-text" style="margin-top:22px">
+          Initializing…
+        </p>
+
+      </div>
+    </div>
+
     <!-- ================= BYPASS PAGE ================= -->
     <div id="bypass" class="center-box" style="display:none">
       <div class="content animate-in">
         <div class="skull-icon">☠</div>
 
-        <h1 class="alert-title">BYPASS DETECTED !</h1>
+        <h1 class="alert-title">BYPASS DETECTED</h1>
 
         <p class="alert-text">
-          Don’t be oversmart and attempt to bypass links for paid content.<br>
-          Repeated violations may permanently block your access.
+          Unauthorized access attempt detected.<br>
+          Repeated violations may result in permanent blocking.
         </p>
 
         <div class="divider" style="margin:22px 0"></div>
 
         <p class="footer-text">
           Created by
-          <a href="https://t.me/Obsidian_Bots" target="_blank">
-            Obsidian Bots
-          </a>
+          <a href="https://t.me/Obsidian_Bots" target="_blank">Obsidian Bots</a>
         </p>
       </div>
     </div>
@@ -60,12 +120,9 @@
       <div class="content animate-in">
         <h1 class="alert-title">VERIFY ACCESS</h1>
 
-        <p class="alert-text">
-          Please complete verification to continue
-        </p>
+        <p class="alert-text">Please complete verification to continue</p>
 
         <div
-          id="turnstile-box"
           class="cf-turnstile"
           data-sitekey="0x4AAAAAACJMB1_RfxHtOMMU"
           data-callback="onVerified"
@@ -73,7 +130,7 @@
           style="margin-top:20px"
         ></div>
 
-        <p id="status" class="footer-text" style="margin-top:28px">
+        <p class="footer-text" style="margin-top:28px">
           Waiting for verification…
         </p>
 
@@ -81,9 +138,7 @@
 
         <p class="footer-text">
           Created by
-          <a href="https://t.me/Obsidian_Bots" target="_blank">
-            Obsidian Bots
-          </a>
+          <a href="https://t.me/Obsidian_Bots" target="_blank">Obsidian Bots</a>
         </p>
       </div>
     </div>
@@ -94,27 +149,21 @@
 
         <div style="font-size:72px; margin-bottom:16px">⚠️</div>
 
-        <h1 class="alert-title" style="color:#ff4d4d">
-          NOT AVAILABLE
-        </h1>
+        <h1 class="alert-title" style="color:#ff4d4d">NOT AVAILABLE</h1>
 
         <p class="alert-text">
-          The page you are trying to access does not exist,
-          has expired, or is unavailable.
+          The page you are trying to access does not exist or has expired.
         </p>
 
         <p class="status" style="color:#ff4d4d; margin-top:18px">
-          Redirecting to home in <span id="countdown">5</span> seconds…
+          Redirecting in <span id="countdown">5</span> seconds…
         </p>
 
         <div class="divider" style="margin:22px 0"></div>
 
-        <!-- SAME FOOTER AS OTHER PAGES -->
         <p class="footer-text">
           Created by
-          <a href="https://t.me/Obsidian_Bots" target="_blank">
-            Obsidian Bots
-          </a>
+          <a href="https://t.me/Obsidian_Bots" target="_blank">Obsidian Bots</a>
         </p>
 
       </div>
