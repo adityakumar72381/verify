@@ -17,13 +17,18 @@ const statusEl = document.getElementById("status");
    HANDLE /404 ROUTE (EARLY EXIT)
 ========================= */
 if (hash === "404") {
+  // Hide other states
   if (bypassBox) bypassBox.style.display = "none";
   if (verifyBox) verifyBox.style.display = "none";
+
+  // Show 404 state
   if (notFoundBox) notFoundBox.style.display = "flex";
 
+  // Footer year
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  // Countdown redirect
   let sec = 5;
   const el = document.getElementById("countdown");
   if (el) {
@@ -37,6 +42,7 @@ if (hash === "404") {
     }, 1000);
   }
 
+  // Stop further execution
   throw new Error("404 page rendered");
 }
 
@@ -52,21 +58,21 @@ const ALLOWED_DOMAINS = new Set([
 ]);
 
 /* =========================
-   INIT (NO UI SHOWN YET)
+   INIT
 ========================= */
 (function init() {
+  // Empty path → redirect to main site
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // Hide everything initially
-  if (bypassBox) bypassBox.style.display = "none";
-  if (verifyBox) verifyBox.style.display = "none";
-  if (notFoundBox) notFoundBox.style.display = "none";
+  // Show neutral state first
+  showVerify();
+  if (statusEl) statusEl.textContent = "Checking link integrity…";
 
-  // Run referrer check immediately
-  checkReferrerAndProceed();
+  // Delay decision (UX purpose)
+  setTimeout(checkReferrerAndProceed, 1000);
 })();
 
 /* =========================
@@ -75,7 +81,6 @@ const ALLOWED_DOMAINS = new Set([
 function checkReferrerAndProceed() {
   const ref = document.referrer;
 
-  // ❌ No referrer → bypass
   if (!ref) {
     showBypass("🚫 BYPASS DETECTED.");
     return;
@@ -83,13 +88,12 @@ function checkReferrerAndProceed() {
 
   const refDomain = extractMainDomain(ref);
 
-  // ❌ Invalid domain → bypass
   if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
     showBypass("🚫 BYPASS DETECTED.");
     return;
   }
 
-  // ✅ Valid referrer → NOW show verify HTML
+  // Passed checks → allow Turnstile
   showVerify();
   if (statusEl) statusEl.textContent = "Please complete verification…";
 }
@@ -141,16 +145,19 @@ async function onVerified(token) {
 
     const data = await res.json();
 
+    // ✅ SUCCESS
     if (data.success && data.url) {
       location.replace(data.url);
       return;
     }
 
+    // ✅ NOT FOUND → site.com/404
     if (data.reason === "not_found") {
       location.replace("/404");
       return;
     }
 
+    // ❌ OTHER ERRORS
     showBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
