@@ -109,11 +109,19 @@ async function onVerified(token) {
 
     const data = await res.json();
 
+    // ✅ SUCCESS
     if (data.success && data.url) {
       location.replace(data.url);
       return;
     }
 
+    // ✅ NOT FOUND → site.com/404
+    if (data.reason === "not_found") {
+      location.replace("/404");
+      return;
+    }
+
+    // ❌ OTHER ERRORS
     showBypass("🚫 " + (data.reason || "Access denied"));
 
   } catch (e) {
