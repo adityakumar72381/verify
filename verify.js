@@ -1,26 +1,19 @@
 let locked = false;
-let decisionLocked = false;
 
 /* =========================
-HASH (site.com/abc)
+   HASH (site.com/abc)
 ========================= */
 const hash = location.pathname.replace(/^\/+|\/+$/g, "");
 
 /* =========================
-CACHE REFERRER (ONCE)
+   UI ELEMENTS
 ========================= */
-const INITIAL_REFERRER = document.referrer;
+const bypassBox = document.getElementById("bypass");
+const verifyBox = document.getElementById("verify");
+const statusEl = document.getElementById("status");
 
 /* =========================
-UI ELEMENTS
-========================= */
-const loadingBox = document.getElementById("loading");
-const bypassBox  = document.getElementById("bypass");
-const verifyBox  = document.getElementById("verify");
-const statusEl   = document.getElementById("status");
-
-/* =========================
-ALLOWED REFERRER DOMAINS
+   ALLOWED REFERRER DOMAINS
 ========================= */
 const ALLOWED_DOMAINS = new Set([
   "vplink",
@@ -31,48 +24,48 @@ const ALLOWED_DOMAINS = new Set([
 ]);
 
 /* =========================
-INIT
+   INIT
 ========================= */
 (function init() {
-  // Empty path → redirect
+  // Empty path → redirect to main site
   if (!hash) {
     location.replace("https://nxlinks.site");
     return;
   }
 
-  // STEP 1: detect referrer immediately
-  const isAllowed = isValidReferrer(INITIAL_REFERRER);
-
-  // STEP 2: show loader AFTER detection
-  showLoading();
+  // Show neutral state first
+  showVerify();
   statusEl.textContent = "Checking link integrity…";
 
-  // STEP 3: lock & show result
-  setTimeout(() => {
-    if (decisionLocked) return;
-    decisionLocked = true;
-
-    if (!isAllowed) {
-      showBypass("🚫 BYPASS DETECTED.");
-    } else {
-      showVerify();
-      statusEl.textContent = "Please complete verification…";
-    }
-  }, 1000);
+  // Delay decision (UX purpose)
+  setTimeout(checkReferrerAndProceed, 1000);
 })();
 
 /* =========================
-REFERRER VALIDATION
+   REFERRER CHECK
 ========================= */
-function isValidReferrer(ref) {
-  if (!ref) return false;
+function checkReferrerAndProceed() {
+  const ref = document.referrer;
 
-  const domain = extractMainDomain(ref);
-  return domain && ALLOWED_DOMAINS.has(domain);
+  if (!ref) {
+    showBypass("🚫 BYPASS DETECTED.");
+    return;
+  }
+
+  const refDomain = extractMainDomain(ref);
+
+  if (!refDomain || !ALLOWED_DOMAINS.has(refDomain)) {
+    showBypass("🚫 BYPASS DETECTED.");
+    return;
+  }
+
+  // Passed checks → allow Turnstile
+  showVerify();
+  statusEl.textContent = "Please complete verification…";
 }
 
 /* =========================
-HELPERS
+   HELPERS
 ========================= */
 function extractMainDomain(ref) {
   try {
@@ -84,30 +77,19 @@ function extractMainDomain(ref) {
   }
 }
 
-/* =========================
-UI HELPERS
-========================= */
-function showLoading() {
-  loadingBox.style.display = "flex";
-  bypassBox.style.display  = "none";
-  verifyBox.style.display  = "none";
-}
-
 function showBypass(message) {
-  loadingBox.style.display = "none";
-  bypassBox.style.display  = "flex";
-  verifyBox.style.display  = "none";
-  statusEl.textContent = message;
+  bypassBox.style.display = "flex";
+  verifyBox.style.display = "none";
+  if (statusEl) statusEl.textContent = message;
 }
 
 function showVerify() {
-  loadingBox.style.display = "none";
-  bypassBox.style.display  = "none";
-  verifyBox.style.display  = "flex";
+  bypassBox.style.display = "none";
+  verifyBox.style.display = "flex";
 }
 
 /* =========================
-TURNSTILE CALLBACK
+   TURNSTILE CALLBACK
 ========================= */
 async function onVerified(token) {
   if (locked) return;
