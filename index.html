@@ -5,7 +5,7 @@
   <title>NXLinks – Secure Access</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Cloudflare Turnstile (kept in head as requested) -->
+  <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Fonts -->
@@ -39,11 +39,10 @@
 
   <main class="page">
 
-    <!-- ================= LOADING PAGE (DEFAULT) ================= -->
+    <!-- ================= LOADING PAGE (STATIC) ================= -->
     <div id="loading" class="center-box">
       <div class="content animate-in" style="text-align:center">
 
-        <!-- External SVG loader (UNCHANGED FILE) -->
         <div style="width:64px; margin:0 auto 18px;">
           <img
             src="./loader.svg"
@@ -53,11 +52,13 @@
         </div>
 
         <h1 class="alert-title">VERIFYING...</h1>
+
         <p class="alert-text">
           Please wait while we validate your access…
         </p>
 
-        <p id="status" class="footer-text" style="margin-top:22px">
+        <!-- 🔒 STATIC TEXT (NO ID, NO JS CONTROL) -->
+        <p class="footer-text" style="margin-top:22px">
           Initializing…
         </p>
 
@@ -104,7 +105,8 @@
           style="margin-top:20px"
         ></div>
 
-        <p class="footer-text" style="margin-top:28px">
+        <!-- ✅ JS-CONTROLLED STATUS (ONLY HERE) -->
+        <p id="status" class="footer-text" style="margin-top:28px">
           Waiting for verification…
         </p>
 
@@ -155,4 +157,4 @@
   <script src="verify.js"></script>
 
 </body>
-  </html>
+</html>
