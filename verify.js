@@ -62,7 +62,6 @@ const ALLOWED_DOMAINS = new Set([
 
   showLoading("Checking link integrity…");
 
-  // Allow browser to settle referrer
   setTimeout(checkReferrerAndProceed, 800);
 })();
 
@@ -85,9 +84,9 @@ function checkReferrerAndProceed() {
     return;
   }
 
-  // ✅ PASSED
+  // ✅ PASSED → show verify + waiting text
   showVerify();
-  if (statusEl) statusEl.textContent = "Please complete verification…";
+  if (statusEl) statusEl.textContent = "Waiting for verification…";
 }
 
 /* =========================
@@ -95,7 +94,7 @@ function checkReferrerAndProceed() {
 ========================= */
 function lockBypass(message) {
   bypassLocked = true;
-  locked = true; // ⛔ prevents Turnstile + API
+  locked = true;
   showBypass(message);
 }
 
@@ -142,7 +141,6 @@ function extractMainDomain(ref) {
    TURNSTILE CALLBACK
 ========================= */
 async function onVerified(token) {
-  // ⛔ HARD BLOCK
   if (locked || bypassLocked) return;
 
   locked = true;
@@ -161,7 +159,10 @@ async function onVerified(token) {
     const data = await res.json();
 
     if (data.success && data.url) {
-      location.replace(data.url);
+      if (statusEl) statusEl.textContent = "Redirecting securely…";
+      setTimeout(() => {
+        location.replace(data.url);
+      }, 300);
       return;
     }
 
